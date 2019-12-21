@@ -1,0 +1,62 @@
+#include <HX711.h>
+//#define PIN 
+// Hx711.DOUT: A1
+// Hx711.SCK:  A0
+Hx711 scale(A1, A0);
+
+void HX711Init(void)
+{
+  Serial.println("System Init,Please Wait...");
+  
+  long offset= scale.getAverageValue(30);//计算偏移量(此时称必须保持水平且称上不能有东西！！！)
+  scale.setOffset(offset);//设置偏移
+  scale.setScale(0.4);//设置比例(此值需要根据不同的重量传感器自己设置！)
+
+ // pinMode(10,OUTPUT);
+}
+
+void setup() 
+{
+  Serial.println("setup starting...");
+  Serial.begin(9600);                                 
+  HX711Init();
+  pinMode(10,OUTPUT);  //设置输出口
+  pinMode(11,OUTPUT);
+  Serial.println("setup ended");
+  Serial.println('\n');
+}
+
+void loop() 
+{
+  Serial.println("new detecting started...");
+  Serial.print("Weight: ");
+  Serial.print(-(double)scale.getWeight(10)/10000);
+  Serial.println(" kg");
+
+ // analogWrite(10,HIGH);
+  
+  if((double)scale.getWeight(10)/10000 < -10.0 && (double)scale.getWeight(10)/10000 > -45.0 )
+  {
+    Serial.println("pressure detected");
+    Serial.println("changing output...");
+    //digitalWrite(10,HIGH);    //这个故事告诉我们 一定要检查串口是不是插错了 @WWY
+    digitalWrite(11,HIGH);
+    Serial.println("changing ended");
+    Serial.print("output state : ");
+    Serial.println(digitalRead(11));
+    Serial.println(".....this line is used to mark the changing point.....");
+    //delay(2020)
+    //Serial.println("delay end");
+  }
+ else
+ {
+    //digitalWrite(10,LOW);     //关闹钟失败的根源
+    digitalWrite(11,LOW);
+    Serial.print("output state : ");
+    Serial.println(digitalRead(11));
+    delay(20);
+ }
+
+ Serial.println("detecting ended");
+ Serial.println('\n'); 
+ }
